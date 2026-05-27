@@ -1,0 +1,577 @@
+# This code-samples file is used by the Meilisearch documentation
+# Every example written here will be automatically fetched by
+# the documentation on build
+# You can read more on https://github.com/meilisearch/documentation/tree/master/.vuepress/code-samples
+---
+synonyms_guide_1: |-
+  var synonyms = new Dictionary<string, IEnumerable<string>>
+  {
+      { "great", new string[] { "fantastic" } },
+      { "fantastic", new string[] { "great" } }
+  };
+  await client.Index("movies").UpdateSynonymsAsync(synonyms);
+date_guide_index_1: |-
+  string jsonString = await File.ReadAllTextAsync("games.json");
+  var games = JsonSerializer.Deserialize<IEnumerable<Movie>>(jsonString, options);
+  var index = client.Index("games");
+  await index.AddDocumentsAsync<Movie>(games);
+date_guide_filterable_attributes_1: |-
+  await client.Index("games").UpdateFilterableAttributesAsync(new string[] { "release_timestamp" });
+date_guide_filter_1: |-
+  var filters = new SearchQuery() { Filter = "release_timestamp >= 1514761200 AND release_timestamp < 1672527600" };
+  var games = await client.Index("games").SearchAsync<Game>("", filters);
+date_guide_sortable_attributes_1: |-
+  await client.Index("games").UpdateSortableAttributesAsync(new string[] { "release_timestamp" });
+date_guide_sort_1: |-
+  SearchQuery sort = new SearchQuery() { Sort = new string[] { "release_timestamp:desc" }};
+  await client.Index("games").SearchAsync<Game>("", sort);
+filtering_guide_nested_1: |-
+  var filters = new SearchQuery() { Filter = "rating.users >= 90" };
+  var movies = await client.Index("movie_ratings").SearchAsync<MovieRating>("thriller", filters);
+sorting_guide_sort_nested_1: |-
+  SearchQuery sort = new SearchQuery() { Sort = new string[] { "rating.users:asc" }};
+  await client.Index("books").SearchAsync<Book>("science fiction", sort);
+async_guide_multiple_filters_1: |-
+  var query = new TasksQuery { IndexUids = new List<string> { "movies" }, Types = new List<TaskInfo> { TaskInfo.DocumentAdditionOrUpdate, TaskInfo.DocumentDeletion }, Statuses = new List<TaskInfoStatus> { TaskInfoStatus.Processing } };
+
+  await client.GetTasksAsync(query);
+async_guide_filter_by_statuses_1: |-
+  await client.GetTasksAsync(new TasksQuery { Statuses = new List<TaskInfoStatus> { TaskInfoStatus.Failed, TaskInfoStatus.Canceled } });
+delete_tasks_1: |-
+  await client.DeleteTasksAsync(new DeleteTasksQuery { Uids = new List<int> { 1, 2 } });
+cancel_tasks_1: |-
+  await client.CancelTasksAsync(new CancelTasksQuery { Uids = new List<int> { 1, 2 } });
+swap_indexes_1: |-
+  await client.SwapIndexesAsync(new List<IndexSwap> { new IndexSwap("indexA", "indexB"), new IndexSwap("indexX", "indexY") } });
+get_one_index_1: |-
+  await client.GetIndexAsync("movies");
+list_all_indexes_1: |-
+  await client.GetAllIndexesAsync(new IndexesQuery { Limit = 3 });
+create_an_index_1: |-
+  TaskInfo task = await client.CreateIndexAsync("movies", "id");
+update_an_index_1: |-
+  TaskInfo task = await client.UpdateIndexAsync("movies", "id");
+delete_an_index_1: |-
+  await client.DeleteIndexAsync("movies");
+get_one_document_1: |-
+  await client.Index("movies").GetDocumentAsync<Movie>(25684, new List<string> { "id", "title", "poster", "release_date" });
+get_documents_1: |-
+  await client.Index("movies").GetDocumentsAsync<Movie>(new DocumentsQuery() { Limit = 2, Filter = "genres = action" });
+get_documents_post_1: |-
+  await client.Index("movies").GetDocumentsAsync<Movie>(new DocumentsQuery() {
+      Limit = 3,
+      Fields = new List<string> { "title", "genres", "rating", "language"},
+      Filter = "(rating > 3 AND (genres=Adventure OR genres=Fiction)) AND language=English"
+  });
+add_or_replace_documents_1: |-
+  var movie = new[]
+  {
+      new Movie
+      {
+            Id = "287947",
+            Title = "Shazam",
+            Poster = "https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg",
+            Overview = "A boy is given the ability to become an adult superhero in times of need with a single magic word.",
+            ReleaseDate = "2019-03-23"
+      }
+  };
+  await index.AddDocumentsAsync(movie);
+add_or_update_documents_1: |-
+  var movie = new[]
+  {
+      new Movie { Id = "287947", Title = "Shazam ⚡️", Genres = "comedy" }
+  };
+  await index.UpdateDocumentsAsync(movie);
+delete_all_documents_1: |-
+  await client.Index("movies").DeleteAllDocumentsAsync();
+delete_one_document_1: |-
+  await client.Index("movies").DeleteOneDocumentAsync("25684");
+delete_documents_by_batch_1: |-
+  await client.Index("movies").DeleteDocumentsAsync(new[] { "23488", "153738", "437035", "363869" });
+delete_documents_by_filter_1: |-
+  await client.Index("movies").DeleteDocumentsAsync(new DeleteDocumentsQuery() { Filter = "genres = action OR genres = adventure" });
+search_post_1: |-
+  await client.Index("movies").SearchAsync<Movie>("American ninja");
+get_task_1: |
+  TaskInfo task = await client.GetTaskAsync(1);
+get_all_tasks_1: |
+  ResourceResults<Task> taskResult = await client.GetTasksAsync();
+get_settings_1: |-
+  await client.Index("movies").GetSettingsAsync();
+update_settings_1: |-
+  Settings newSettings = new Settings
+  {
+    RankingRules = new string[]
+    {
+      "words",
+      "typo",
+      "proximity",
+      "attribute",
+      "sort",
+      "exactness",
+      "release_date:desc",
+      "rank:desc"
+    },
+    DistinctAttribute = "movie_id",
+    SearchableAttributes = new string[] { "title", "overview", "genres" },
+    DisplayedAttributes = new string[] { "title", "overview", "genres", "release_date" },
+    SortableAttributes = new string[] { "title", "release_date" },
+    StopWords = new string[] { "the", "a", "an" },
+    Synonyms = new Dictionary<string, IEnumerable<string>>
+    {
+        { "wolverine", new string[] { "xmen", "logan" } },
+        { "logan", new string[] { "wolverine" } },
+    },
+    FilterableAttributes = new string[] { },
+    TypoTolerance = new TypoTolerance
+    {
+        DisableOnAttributes = new string[] { "title" },
+        MinWordSizeForTypos = new TypoTolerance.TypoSize
+        {
+            OneTypo = 8,
+            TwoTypos = 10
+        }
+    },
+    SearchCutoffMs = 150
+  };
+  TaskInfo task = await client.Index("movies").UpdateSettingsAsync(newFilters);
+reset_settings_1: |-
+  await client.Index("movies").ResetSettingsAsync();
+get_synonyms_1: |-
+  await client.Index("movies").GetSynonymsAsync();
+update_synonyms_1: |-
+  var synonyms = new Dictionary<string, IEnumerable<string>>
+  {
+      { "wolverine", new string[] { "xmen", "logan" } },
+      { "logan", new string[] { "wolverine", "xmen" } },
+      { "wow", new string[] { "world of warcraft" } }
+  };
+  await client.Index("movies").UpdateSynonymsAsync(synonyms);
+reset_synonyms_1: |-
+  await client.Index("movies").ResetSynonymsAsync();
+get_stop_words_1: |-
+  await client.Index("movies").GetStopWordsAsync();
+update_stop_words_1: |-
+  await client.Index("movies").UpdateStopWordsAsync(new[] {"of", "the", "to"});
+reset_stop_words_1: |-
+  await client.Index("movies").ResetStopWordsAsync();
+get_separator_tokens_1: |-
+  await client.Index("movies").GetSeparatorTokensAsync();
+update_separator_tokens_1: |-
+  await client.Index("movies").UpdateSeparatorTokensAsync(new[] { "|", "&hellip;" });
+reset_separator_tokens_1: |-
+  await client.Index("movies").ResetSeparatorTokensAsync();
+get_non_separator_tokens_1: |-
+  await client.Index("movies").GetNonSeparatorTokensAsync();
+update_non_separator_tokens_1: |-
+  await client.Index("movies").UpdateNonSeparatorTokensAsync(new[] { "@", "#" });
+reset_non_separator_tokens_1: |-
+  await client.Index("movies").ResetNonSeparatorTokensAsync();
+get_ranking_rules_1: |-
+  await client.Index("movies").GetRankingRulesAsync();
+update_ranking_rules_1: |-
+  await client.Index("movies").UpdateRankingRulesAsync(new[]
+  {
+      "words",
+      "typo",
+      "proximity",
+      "attribute",
+      "sort",
+      "exactness",
+      "release_date:asc",
+      "rank:desc"
+  });
+reset_ranking_rules_1: |-
+  await client.Index("movies").ResetRankingRulesAsync();
+get_distinct_attribute_1: |-
+  string result = await client.Index("shoes").GetDistinctAttributeAsync();
+update_distinct_attribute_1: |-
+  TaskInfo result = await client.Index("shoes").UpdateDistinctAttributeAsync("skuid");
+reset_distinct_attribute_1: |-
+  TaskInfo result = await client.Index("shoes").ResetDistinctAttributeAsync();
+get_searchable_attributes_1: |-
+  await client.Index("movies").GetSearchableAttributesAsync();
+update_searchable_attributes_1: |-
+  await client.Index("movies").UpdateSearchableAttributesAsync(new[] {"title", "overview", "genres"});
+reset_searchable_attributes_1: |-
+  await client.Index("movies").ResetSearchableAttributesAsync();
+get_filterable_attributes_1: |-
+  IEnumerable<string> attributes = await client.Index("movies").GetFilterableAttributesAsync();
+update_filterable_attributes_1: |-
+  List<string> attributes = new() { "genres", "director" };
+  TaskInfo result = await client.Index("movies").UpdateFilterableAttributesAsync(attributes);
+reset_filterable_attributes_1: |-
+  TaskInfo result = await client.Index("movies").ResetFilterableAttributesAsync();
+get_displayed_attributes_1: |-
+  await client.Index("movies").GetDisplayedAttributesAsync();
+update_displayed_attributes_1: |-
+  await client.Index("movies").UpdateDisplayedAttributesAsync(new[]
+  {
+    "title",
+    "overview",
+    "genres",
+    "release_date"
+  });
+reset_displayed_attributes_1: |-
+  await client.Index("movies").ResetDisplayedAttributesAsync();
+get_index_stats_1: |-
+  await client.Index("movies").GetStatsAsync();
+get_indexes_stats_1: |-
+  await client.GetStatsAsync();
+get_health_1: |-
+  await client.HealthAsync();
+get_version_1: |-
+  await client.GetVersionAsync();
+distinct_attribute_guide_1: |-
+  await client.Index("jackets").UpdateDistinctAttributeAsync("product_id");
+field_properties_guide_displayed_1: |-
+  await client.Index("movies").UpdateDisplayedAttributesAsync(new[]
+  {
+      "title",
+      "overview",
+      "genres",
+      "release_date"
+  });
+filtering_guide_1: |-
+  SearchQuery filters = new SearchQuery() { Filter = "release_date > \"795484800\"" };
+  var movies = await client.Index("movie_ratings").SearchAsync<Movie>("Avengers", filters);
+filtering_guide_2: |-
+  SearchQuery filters = new SearchQuery() { Filter = "release_date > 795484800 AND (director =
+  \"Tim Burton\" OR director = \"Christopher Nolan\")" };
+  var movies = await client.Index("movie_ratings").SearchAsync<Movie>("Batman", filters);
+filtering_guide_3: |-
+  SearchQuery filters = new SearchQuery() { Filter = "release_date > 1577884550 AND (NOT director = \"Tim Burton\")" };
+  var movies = await client.Index("movie_ratings").SearchAsync<Movie>("Planet of the Apes", filters);
+getting_started_add_documents: |-
+  // In the command line:
+  // dotnet add package Meilisearch
+
+  // In your .cs file:
+  using System.IO;
+  using System.Text.Json;
+  using Meilisearch;
+  using System.Threading.Tasks;
+  using System.Collections.Generic;
+
+  namespace Meilisearch_demo
+  {
+      public class Movie
+      {
+          public string Id { get; set; }
+          public string Title { get; set; }
+          public string Poster { get; set; }
+          public string Overview { get; set; }
+          public IEnumerable<string> Genres { get; set; }
+      }
+
+      internal class Program
+      {
+          static async Task Main(string[] args)
+          {
+              MeilisearchClient client = new MeilisearchClient("MEILISEARCH_URL", "aSampleMasterKey");
+              var options = new JsonSerializerOptions
+              {
+                  PropertyNameCaseInsensitive = true
+              };
+
+              string jsonString = await File.ReadAllTextAsync("movies.json");
+              var movies = JsonSerializer.Deserialize<IEnumerable<Movie>>(jsonString, options);
+
+              var index = client.Index("movies");
+              await index.AddDocumentsAsync<Movie>(movies);
+          }
+      }
+  }
+getting_started_check_task_status: |-
+  TaskInfo task = await client.GetTaskAsync(0);
+getting_started_search: |-
+  MeilisearchClient client = new MeilisearchClient("MEILISEARCH_URL", "masterKey");
+  var index = client.Index("movies");
+
+  var movies = await index.SearchAsync<Movie>("botman");
+  foreach (var movie in movies.Hits)
+  {
+      Console.WriteLine(movie.Title);
+  }
+filtering_update_settings_1: |-
+  await client.Index("movies").UpdateFilterableAttributesAsync(new [] { "director", "genres" });
+faceted_search_update_settings_1: |-
+  List<string> attributes = new() { "genres", "rating", "language" };
+  TaskInfo result = await client.Index("movie_ratings").UpdateFilterableAttributesAsync(attributes);
+faceted_search_1: |-
+  var sq = new SearchQuery
+  {
+      Facets = new string[] { "genres", "rating", "language" }
+  };
+  await client.Index("books").SearchAsync<Book>("classic", sq);
+add_movies_json_1: |-
+  // Make sure to add this using to your code
+  using System.IO;
+
+  var jsonDocuments = await File.ReadAllTextAsync("movies.json");
+  await client.Index("movies").AddDocumentsJsonAsync(jsonDocuments);
+post_dump_1: |-
+  await client.CreateDumpAsync();
+sorting_guide_update_sortable_attributes_1: |-
+  await client.Index("books").UpdateSortableAttributesAsync(new [] { "price", "author" });
+sorting_guide_update_ranking_rules_1: |-
+  await client.Index("books").UpdateRankingRulesAsync(new[]
+  {
+      "words",
+      "sort",
+      "typo",
+      "proximity",
+      "attribute",
+      "exactness"
+  });
+sorting_guide_sort_parameter_1: |-
+  var sq = new SearchQuery
+  {
+    Sort = new[] { "price:asc" },
+  };
+  await client.Index("books").SearchAsync<Book>("science fiction", sq);
+sorting_guide_sort_parameter_2: |-
+  var sq = new SearchQuery
+  {
+    Sort = new[] { "author:desc" },
+  };
+  await client.Index("books").SearchAsync<Book>("butler", sq);
+get_sortable_attributes_1: |-
+  await client.Index("books").GetSortableAttributesAsync();
+update_sortable_attributes_1: |-
+  await client.Index("books").UpdateSortableAttributesAsync(new [] { "price", "author" });
+reset_sortable_attributes_1: |-
+  await client.Index("books").ResetSortableAttributesAsync();
+geosearch_guide_filter_settings_1: |-
+  List<string> attributes = new() { "_geo" };
+  TaskInfo result = await client.Index("movies").UpdateFilterableAttributesAsync(attributes);
+geosearch_guide_filter_usage_1: |-
+  SearchQuery filters = new SearchQuery() { Filter = "_geoRadius(45.472735, 9.184019, 2000)" };
+  var restaurants = await client.Index("restaurants").SearchAsync<Restaurant>("", filters);
+geosearch_guide_filter_usage_2: |-
+  SearchQuery filters = new SearchQuery()
+  {
+      Filter = new string[] { "_geoRadius(45.472735, 9.184019, 2000) AND type = pizza" }
+  };
+
+  var restaurants = await client.Index("restaurants").SearchAsync<Restaurant>("restaurants", filters);
+geosearch_guide_sort_settings_1: |-
+  List<string> attributes = new() { "_geo" };
+  TaskInfo result = await client.Index("restaurants").UpdateSortableAttributesAsync(attributes);
+geosearch_guide_sort_usage_1: |-
+  SearchQuery filters = new SearchQuery()
+  {
+      Sort = new string[] { "_geoPoint(48.8561446,2.2978204):asc" }
+  };
+
+  var restaurants = await client.Index("restaurants").SearchAsync<Restaurant>("", filters);
+geosearch_guide_sort_usage_2: |-
+  SearchQuery filters = new SearchQuery()
+  {
+      Sort = new string[] {
+            "_geoPoint(48.8561446,2.2978204):asc",
+            "rating:desc"
+      }
+  };
+
+  var restaurants = await client.Index("restaurants").SearchAsync<Restaurant>("restaurants", filters);
+geosearch_guide_filter_usage_3: |-
+  SearchQuery filters = new SearchQuery()
+  {
+      Filter = "_geoBoundingBox([45.494181, 9.214024], [45.449484, 9.179175])"
+  };
+  var restaurants = await client.Index("restaurants").SearchAsync<Restaurant>("restaurants", filters);
+primary_field_guide_create_index_primary_key: |-
+  TaskInfo task = await client.CreateIndexAsync("books", "reference_number");
+primary_field_guide_update_document_primary_key: |-
+  TaskInfo task = await client.UpdateIndexAsync("books", "title");
+primary_field_guide_add_document_primary_key: |-
+  await index.AddDocumentsAsync(
+    new[] {
+        new Book {
+            ReferenceNumber = 287947,
+            Title = "Diary of a Wimpy Kid",
+            Author = "Jeff Kinney",
+            Genres = new string[] { "comedy", "humor" },
+            Price = 5.00
+        }
+    },
+    "reference_number");
+authorization_header_1: |-
+  MeilisearchClient client = new MeilisearchClient("MEILISEARCH_URL", "masterKey");
+  var keys = await client.GetKeysAsync();
+get_one_key_1: |-
+  Key key = await client.GetKeyAsync("d0552b41536279a0ad88bd595327b96f01176a60c2243e906c52ac02375f9bc4");
+get_all_keys_1: |-
+  ResourceResults<Key> keyResult = await client.GetKeysAsync(new KeysQuery { Limit = 3 });
+create_a_key_1: |-
+  Key keyOptions = new Key
+  {
+      Description = "Add documents: Products API key",
+      Actions = new KeyAction[] { KeyAction.DocumentsAdd },
+      Indexes = new string[] { "products" },
+      ExpiresAt = DateTime.Parse("2042-04-02T00:42:42Z")
+  };
+  Key createdKey = await this.client.CreateKeyAsync(keyOptions);
+update_a_key_1: |-
+  await client.UpdateKeyAsync(
+    "6062abda-a5aa-4414-ac91-ecd7944c0f8d",
+    description: "Manage documents: Products/Reviews API key",
+    name: "Products/Reviews API key"
+  )
+delete_a_key_1: |-
+  client.DeleteKeyAsync("6062abda-a5aa-4414-ac91-ecd7944c0f8d")
+tenant_token_guide_generate_sdk_1: |-
+  var apiKey = "B5KdX2MY2jV6EXfUs6scSfmC...";
+  var expiresAt = new DateTime(2025, 12, 20);
+  var searchRules = new TenantTokenRules(new Dictionary<string, object> {
+    { "patient_medical_records", new Dictionary<string, object> { { "filter", "user_id = 1" } } }
+  });
+
+  token = client.GenerateTenantToken(
+    searchRules,
+    apiKey: apiKey // optional,
+    expiresAt: expiresAt // optional
+  );
+tenant_token_guide_search_sdk_1: |-
+  frontEndClient = new MeilisearchClient("MEILISEARCH_URL", token);
+  var searchResult = await frontEndClient.Index("patient_medical_records").SearchAsync<Patient>("blood test");
+get_typo_tolerance_1: await client.Index("books").GetTypoToleranceAsync();
+update_typo_tolerance_1: |-
+  var typoTolerance = new TypoTolerance {
+    DisableOnAttributes = new string[] { "title" },
+    MinWordSizeTypos = new TypoTolerance.TypoSize {
+        OneTypo = 4,
+        TwoTypos = 10
+    }
+  };
+
+  await client.Index("books").UpdateTypoToleranceAsync(typoTolerance);
+reset_typo_tolerance_1: |-
+  await client.Index("books").ResetTypoToleranceAsync();
+typo_tolerance_guide_1: |-
+  var typoTolerance = new TypoTolerance {
+    Enabled = false
+  };
+  await client.Index("movies").UpdateTypoToleranceAsync(typoTolerance);
+typo_tolerance_guide_2: |-
+  var typoTolerance = new TypoTolerance {
+    DisableOnAttributes = new string[] { "title" }
+  };
+  await client.Index("movies").UpdateTypoToleranceAsync(typoTolerance);
+typo_tolerance_guide_3: |-
+  var typoTolerance = new TypoTolerance {
+    DisableOnWords = new string[] { "shrek" }
+  };
+  await client.Index("movies").UpdateTypoToleranceAsync(typoTolerance);
+typo_tolerance_guide_4: |-
+  var typoTolerance = new TypoTolerance {
+    MinWordSizeTypos = new TypoTolerance.TypoSize {
+      OneTypo = 4,
+      TwoTypos = 10
+    }
+  };
+
+  await client.Index("movies").UpdateTypoToleranceAsync(typoTolerance);
+get_all_tasks_paginating_1: |-
+  ResourceResults<TaskInfo> taskResult = await client.GetTasksAsync(new TasksQuery { Limit = 2, From = 10 });
+get_all_tasks_paginating_2: |-
+  ResourceResults<TaskInfo> taskResult = await client.GetTasksAsync(new TasksQuery { Limit = 2, From = 8 });
+get_pagination_settings_1: |-
+  await client.Index("movies").GetPaginationAsync();
+update_pagination_settings_1: |-
+  var pagination = new Pagination {
+    MaxTotalHits = 20
+  };
+  await client.Index("movies").UpdatePaginationAsync(pagination);
+reset_pagination_settings_1: |-
+  await client.Index("movies").ResetPaginationAsync();
+get_faceting_settings_1: |-
+  await client.Index("movies").GetFacetingAsync();
+update_faceting_settings_1: |-
+  var faceting = new Faceting
+  {
+      MaxValuesPerFacet = 2,
+      SortFacetValuesBy = new Dictionary<string, SortFacetValuesByType>
+      {
+          ["*"] = SortFacetValuesByType.Alpha,
+          ["genres"] = SortFacetValuesByType.Count
+      }
+  };
+  await client.Index("books").UpdateFacetingAsync(faceting);
+reset_faceting_settings_1: |-
+  await client.Index("movies").ResetFacetingAsync();
+multi_search_1: |-
+  await client.MultiSearchAsync(new MultiSearchQuery()
+  {
+      Queries = new System.Collections.Generic.List<SearchQuery>()
+      {
+          new SearchQuery() {
+            IndexUid = "movies",
+            Q = "booh",
+            Limit = 5
+          },
+          new SearchQuery() {
+            IndexUid = "movies",
+            Q = "nemo",
+            Limit = 5
+          },
+          new SearchQuery() {
+            IndexUid = "movie_ratings",
+            Q = "us",
+          },
+      }
+  });
+get_proximity_precision_settings_1: |-
+  await client.Index("books").GetProximityPrecisionAsync();
+update_proximity_precision_settings_1: |-
+  await client.Index("books").UpdateProximityPrecisionAsync("byAttribute");
+reset_proximity_precision_settings_1: |-
+  await client.Index("books").ResetProximityPrecisionAsync();
+distinct_attribute_guide_filterable_1: |-
+  List<string> attributes = new() { "product_id", "sku", "url" };
+  TaskInfo result = await client.Index("products").UpdateFilterableAttributesAsync(attributes);
+distinct_attribute_guide_distinct_parameter_1: |-
+  var params = new SearchQuery()
+  {
+    Distinct = "sku"
+  };
+  await client.Index("products").SearchAsync<Product>("white shirt", params);
+get_dictionary_1: |-
+  var indexDictionary = await client.Index("books").GetDictionaryAsync();
+update_dictionary_1: |-
+  var newDictionary = new string[] { "J. R. R.", "W. E. B." };
+  await client.Index("books").UpdateDictionaryAsync(newDictionary);
+reset_dictionary_1: |-
+  await client.Index("books").ResetDictionaryAsync();
+create_snapshot_1: |-
+  await client.CreateSnapshotAsync();
+get_search_cutoff_1: |-
+  var searchCutoff = await client.Index("movies").GetSearchCutoffMsAsync();
+update_search_cutoff_1: |-
+  await client.Index("movies").UpdateSearchCutoffMsAsync(150);
+reset_search_cutoff_1: |-
+  await client.Index("movies").ResetSearchCutoffMsAsync();
+facet_search_2: |-
+  var newFaceting = new Faceting
+  {
+      SortFacetValuesBy = new Dictionary<string, SortFacetValuesByType>
+      {
+          ["genres"] = SortFacetValuesByType.Count
+      }
+  };
+  await client.Index("books").UpdateFacetingAsync(newFaceting);
+facet_search_1: |-
+  var query = new SearchFacetsQuery()
+  {
+    FacetQuery = "fiction",
+    Filter = "rating > 3"
+  };
+  await client.Index("books").FacetSearchAsync("genres", query);
+facet_search_3: |-
+  var query = new SearchFacetsQuery()
+  {
+    FacetQuery = "c",
+    ExhaustiveFacetCount: true
+  };
+  await client.Index("books").FacetSearchAsync("genres", query);

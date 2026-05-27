@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - 'dependencies'
+    rebase-strategy: disabled
+
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      time: "04:00"
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+    rebase-strategy: disabled
