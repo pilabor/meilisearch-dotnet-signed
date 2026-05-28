@@ -35,11 +35,12 @@
         <None Include="../../README.md" Pack="true" PackagePath="\" />
         <None Include="../../assets/logo.png" Pack="true" Visible="false" PackagePath="" />
     </ItemGroup>
-
     <ItemGroup>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-            <_Parameter1>Meilisearch.Tests</_Parameter1>
-        </AssemblyAttribute>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+        <_Parameter1>
+            Meilisearch.Tests, PublicKey=002400000480000094000000060200000024000052534131000400000100010069ca72faaea3a957ab11a38837cc53294fc5bddade33f8c81c92928231ce74b4cb00306e07c3e70673c0ec1f4821bfa3baeada5e1842ffcaedb247c901a0630f0ae013ac61774c744a654091016fdb8b1ec787fdf3076f9924c2968a0f94c8a7c82a470783069c6ebd0a1c7428ce48bbd3c166194e4ed3c5ab103553d8a595d8
+        </_Parameter1>
+      </AssemblyAttribute>
     </ItemGroup>
     <ItemGroup>
         <Compile Update="Index.Documents.cs">
