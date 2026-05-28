@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <OutputType>Library</OutputType>
-        <PackageId>MeiliSearchSigned</PackageId>
+        <PackageId>Pilabor.MeiliSearchSigned</PackageId>
         <Version>0.18.0</Version>
         <Description>.NET wrapper for Meilisearch, an open-source search engine</Description>
         <RepositoryUrl>https://github.com/pilabor/meilisearch-dotnet-signed</RepositoryUrl>

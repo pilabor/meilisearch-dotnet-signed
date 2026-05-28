@@ -20,6 +20,11 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.x
+      - name: Restore strong name key
+        run: |
+          mkdir -p build
+          echo "${{ secrets.DOTNET_SIGNING_KEY }}" | base64 -d > build/Meilisearch.snk
+
       - name: Pack
         run: dotnet pack src/Meilisearch/Meilisearch.csproj -c Release -o src/Meilisearch/bin/Release
       - name: Publish
